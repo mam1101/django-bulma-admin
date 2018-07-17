@@ -1,0 +1,116 @@
+{% load i18n static %}<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+<head>
+<title>{% block title %}{% endblock %}</title>
+{#<link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "admin/css/base.css" %}{% endblock %}" />#}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/bulma.min.css" %}" />
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+
+{% block extrastyle %}{% endblock %}
+{% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
+{% block extrahead %}{% endblock %}
+{% block responsive %}
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/responsive.css" %}" />
+    {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% static "admin/css/responsive_rtl.css" %}" />{% endif %}
+{% endblock %}
+{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
+</head>
+{% load i18n %}
+
+<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}"
+  data-admin-utc-offset="{% now "Z" %}">
+
+<!-- Container -->
+<div id="container">
+
+    {% if not is_popup %}
+    <!-- Header -->
+    <div id="header" class="navbar is-spaced is-info has-background-light">
+        <div class="container">
+            <div id="branding" class="navbar-item">
+            {% block branding %}{% endblock %}
+            </div>
+            {% block usertools %}
+            {% if has_permission %}
+                <div class="navbar-end">
+                    <div class="navbar-item" style="color:black;">
+                        {% block welcome-msg %}
+                            {% trans 'Welcome, ' %}
+                            <strong style="color: #000;margin-left: 1em;">{% firstof user.get_short_name user.get_username %}</strong>.
+                        {% endblock %}
+                    </div>
+                    <div class="navbar-item">
+                        {% if site_url %}
+                            <a href="{{ site_url }}" class="button is-link">{% trans 'View site' %}</a>
+                        {% endif %}
+                    </div>
+                    {% comment %}<div class="navbar-item">
+                        {% if user.is_active and user.is_staff %}
+                            {% url 'django-admindocs-docroot' as docsroot %}
+                            {% if docsroot %}
+                                <a href="{{ docsroot }}" class="button is-link">{% trans 'Documentation' %}</a>
+                            {% endif %}
+                        {% endif %}
+                    </div>{% endcomment %}
+                    <div class="navbar-item">
+                        {% if user.has_usable_password %}
+                        <a href="{% url 'admin:password_change' %}" class="button is-link">{% trans 'Change password' %}</a>
+                        {% endif %}
+                    </div>
+                    <div class="navbar-item">
+                        <a href="{% url 'admin:logout' %}" class="button is-danger">{% trans 'Log out' %}</a>
+                    </div>
+                </div>
+
+            {% endif %}
+            {% endblock %}
+            {% block nav-global %}{% endblock %}
+        </div>
+    </div>
+    <!-- END Header -->
+    <section class="hero is-primary">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title">
+                {% block content_title %}{% if title %}{{ title }}{% endif %}{% endblock %}
+            </h1>
+            <h2 class="subtitle breadcrumbs">
+                {% block breadcrumbs %}
+                <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+                {% if title %} &rsaquo; {{ title }}{% endif %}
+                {% endblock %}
+            </h2>
+        </div>
+    </div>
+    </section>
+
+    {% endif %}
+    {% block messages %}
+        {% if messages %}
+        <ul class="messagelist menu-list">{% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+        {% endfor %}</ul>
+        {% endif %}
+    {% endblock messages %}
+
+    <!-- Content -->
+    <div id="content" class="{% block coltype %}colM{% endblock %} container">
+        {% block pretitle %}{% endblock %}
+
+        {% block content %}
+        {% block object-tools %}{% endblock %}
+        {{ content }}
+        {% endblock %}
+        {% block sidebar %}{% endblock %}
+        <br class="clear" />
+    </div>
+    <!-- END Content -->
+
+    {% block footer %}<div id="footer"></div>{% endblock %}
+</div>
+<!-- END Container -->
+
+</body>
+</html>
